@@ -15,6 +15,7 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     const res = await signIn("login", {
       redirect: false,
       email: form.email,
@@ -23,7 +24,7 @@ export default function LoginPage() {
 
     setLoading(false);
     if (res.ok) router.push("/");
-    else alert("Invalid credentials");
+    else alert(res.error || "Invalid credentials");
   };
 
   return (
@@ -88,9 +89,20 @@ export default function LoginPage() {
             )}
           </button>
 
+          <p className="text-center text-sm text-gray-600 mt-2">
+            Don’t have an account?{" "}
+            <button
+              type="button"
+              onClick={() => router.push("/auth/signup")}
+              className="text-blue-600 font-medium hover:underline"
+            >
+              Sign up
+            </button>
+          </p>
+
           <button
             type="button"
-            onClick={() => router.push("/forget")}
+            onClick={() => router.push("/auth/password/forget")}
             className="text-sm text-blue-600 hover:underline w-full text-right"
           >
             Forgot password?

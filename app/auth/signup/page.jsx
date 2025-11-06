@@ -1,9 +1,11 @@
 "use client";
 
 import { Github, Mail } from "lucide-react";
+import { set } from "mongoose";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -13,32 +15,25 @@ export default function SignupPage() {
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSignup = async (e) => {
+  const handleSignup = async(e) =>{
     e.preventDefault();
     setLoading(true);
-
-    try {
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
+    const res = await signIn("signup",{
+      redirect : false,
+      name : form.name,
+      email : form.email,
+      password : form.password
+    })
+    if(res.ok){
+      router.push("/auth/login");
+      toast.success("Account created successfully. Please login.");
       setLoading(false);
-
-      if (res.ok) {
-        alert("Signup successful! Please login.");
-        router.push("/login");
-      } else {
-        const data = await res.json();
-        alert(data.message || "Signup failed");
-      }
-    } catch (err) {
-      console.error(err);
-      setLoading(false);
-      alert("Something went wrong");
     }
-  };
+    else{
+      res.error && toast.error(res.error);
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-blue-50 to-white">
@@ -117,7 +112,7 @@ export default function SignupPage() {
             Already have an account?{" "}
             <span
               className="text-blue-600 hover:underline cursor-pointer"
-              onClick={() => router.push("/login")}
+              onClick={() => router.push("/auth/login")}
             >
               Login
             </span>

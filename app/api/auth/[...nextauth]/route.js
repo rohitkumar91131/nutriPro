@@ -4,11 +4,12 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import bcrypt from "bcryptjs";
-import User from "../../../models/User";
 import connectDB from "../../../lib/mongodb";
+import User from "../../../models/User";
+import clientPromise from "../../../lib/mongoClient";
 
 export const authOptions = {
-  adapters: MongoDBAdapter(connectDB),
+  adapter: MongoDBAdapter(clientPromise),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -43,6 +44,38 @@ export const authOptions = {
         };
       },
     }),
+    CredentialsProvider({
+      id: "signup",
+      name : "signup",
+      credentials: {
+        name : { label : "Name" , type : "text"},
+        email : { label : "Email" , type : "email"},
+        password : { label : "password" , type : "password"}
+    },
+    async authorize (credentials) {
+      await connectDB();
+      const user = await User.findOne( { email : credentials.email});
+      if(user){
+        throw new Error("User already exists");
+      }
+      const hashedPassword = await bcrypt.hash(credentials.password , 12);
+      const newUser = await User.create({
+        name : credentials.name,
+        email : credentials.email,
+        password : hashedPassword
+      });
+      if(!newUser){
+        throw new Error("Error creating user");
+      }
+      return {
+        id : newUser._id.toString(),
+        name : newUser.name,
+        email : newUser.email
+      };  
+
+    }
+
+    })
   ],
 callbacks: {
   async signIn({ user, account, profile }) {
@@ -54,9 +87,9 @@ callbacks: {
     return token;
   },
   async session({ session, token }) {
-    // use token.id, not user.id
     session.user.id = token.id;
-    return session;
+    return session;    session.user.id = token.id;
+
   },
 },
 
