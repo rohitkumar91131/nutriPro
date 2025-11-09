@@ -8,6 +8,7 @@ import {
   Bell,
   Settings,
   LogOut,
+  Banknote
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DotStructure from "./DotStructure";
@@ -23,6 +24,7 @@ export default function NavBar() {
     { id: "/", icon: Home, label: "Home" },
     { id: "/messages", icon: MessageCircle, label: "Messages" },
     { id: "/calendar", icon: Calendar, label: "Meal Calendar" },
+    { id: "/dashboard", icon: Banknote, label: "Dashoard" },
     { divider: true },
     { id: "/notifications", icon: Bell, label: "Notifications" },
     { id: "/settings", icon: Settings, label: "Settings" },

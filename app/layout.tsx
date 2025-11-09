@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster, toast } from 'sonner';
 import NavBar from './components/ui/NavBAr.jsx'
-
+import { DashBoardProvider } from "./context/Dashboard/DashboardContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,9 +32,10 @@ export default function RootLayout({
       <body
         className = "grid grid-cols-[1fr_9fr]"
       >
+        <DashBoardProvider>
         {/* <Toaster position="top-right" richColors /> */}
         <NavBar/>
-        {children}
+        {children}        </DashBoardProvider>
       </body>
     </html>
   );
