@@ -3,7 +3,8 @@
 import { createContext, useContext } from "react";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import { toExcel } from "to-excel";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const DashboardContext = createContext();
 
@@ -48,35 +49,35 @@ const DashBoardProvider = ({ children }) => {
     doc.save("Food_Summary.pdf");
   };
 
-  // ✅ Excel Export (using to-excel)
+  // ✅ Excel Export (using xlsx + file-saver)
   const generateExcel = (data) => {
     if (!data || data.length === 0) {
       alert("No data available to generate Excel.");
       return;
     }
 
-    const headers = [
-      "Food Name",
-      "Quantity",
-      "Calories",
-      "Price",
-      "Notes",
-      "AI Rate",
-    ];
+    // Convert to worksheet
+    const worksheet = XLSX.utils.json_to_sheet(data);
 
-    const rows = data.map((item) => [
-      item.foodName,
-      item.quantity,
-      item.calories,
-      item.price,
-      item.notes,
-      item.aiRate,
-    ]);
+    // Create workbook
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Food_Summary");
 
-    toExcel.exportXLS(headers, rows, "Food_Summary");
+    // Generate binary excel file
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    // Save file
+    const blob = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    saveAs(blob, "Food_Summary.xlsx");
   };
 
-  // ✅ Native CSV Export (no react-json-csv)
+  // ✅ Native CSV Export (no dependencies)
   const generateCsv = (data) => {
     if (!data || data.length === 0) {
       alert("No data available to generate CSV.");
@@ -103,7 +104,7 @@ const DashBoardProvider = ({ children }) => {
           item.notes,
           item.aiRate,
         ]
-          .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+          .map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`)
           .join(",")
       ),
     ];
