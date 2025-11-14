@@ -4,7 +4,7 @@ import "./globals.css";
 import { Toaster, toast } from 'sonner';
 import NavBar from './components/ui/NavBAr.jsx'
 import { DashBoardProvider } from "./context/Dashboard/DashboardContext";
-
+import SessionProviderWrapper from "./providers/SessionProviderWrapper"
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -32,10 +32,11 @@ export default function RootLayout({
       <body
         className = "grid grid-cols-[1fr_9fr]"
       >
+        <SessionProviderWrapper>
         <DashBoardProvider>
-        {/* <Toaster position="top-right" richColors /> */}
         <NavBar/>
         {children}        </DashBoardProvider>
+        </SessionProviderWrapper>
       </body>
     </html>
   );

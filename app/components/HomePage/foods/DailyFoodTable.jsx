@@ -18,14 +18,10 @@ export default function DailyFoodTable() {
   const [foods, setFoods] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Fetch foods from API
   const fetchFoods = async () => {
     try {
-      const res = await fetch("/api/foods/me", {
-        method: "GET",
-        credentials: "include",
-        cache: "no-store",
-      });
-
+      const res = await fetch("/api/foods/me", { cache: "no-store" });
       const data = await res.json();
       setFoods(data.foods || []);
     } catch (error) {
@@ -70,18 +66,30 @@ export default function DailyFoodTable() {
               <TableBody>
                 {foods.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-6 text-gray-500">
+                    <TableCell
+                      colSpan={6}
+                      className="text-center py-6 text-gray-500"
+                    >
                       No food entries added today.
                     </TableCell>
                   </TableRow>
                 ) : (
                   foods.map((food) => (
-                    <TableRow key={food._id} className="hover:bg-orange-50 transition-all">
-                      <TableCell className="font-semibold">{food.foodName}</TableCell>
+                    <TableRow
+                      key={food._id}
+                      className="hover:bg-orange-50 transition-all"
+                    >
+                      <TableCell className="font-semibold">
+                        {food.foodName}
+                      </TableCell>
+
                       <TableCell>{food.quantity}</TableCell>
+
                       <TableCell>{food.calories || "-"}</TableCell>
+
                       <TableCell>{food.price || "-"}</TableCell>
 
+                      {/* AI Rating */}
                       <TableCell className="flex items-center gap-1">
                         <Star
                           fill={food.aiRating ? "#f59e0b" : "none"}

@@ -22,13 +22,48 @@ export default function FoodForm() {
     notes: "",
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(form);
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/foods/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+      console.log("API Response:", data);
+
+      if (!res.ok) {
+        alert("Something went wrong!");
+        setLoading(false);
+        return;
+      }
+
+      setForm({
+        foodName: "",
+        quantity: "",
+        calories: "",
+        price: "",
+        notes: "",
+      });
+
+      alert("Food Entry Added Successfully!");
+    } catch (error) {
+      console.error(error);
+      alert("Error connecting to server.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -44,76 +79,63 @@ export default function FoodForm() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="foodName" className="text-sm text-gray-700">
-                Food Name
-              </Label>
+              <Label htmlFor="foodName">Food Name</Label>
               <Input
                 id="foodName"
                 name="foodName"
                 placeholder="e.g. Boiled Eggs"
                 value={form.foodName}
                 onChange={handleChange}
-                className="focus:ring-2 focus:ring-orange-400"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="quantity" className="text-sm text-gray-700">
-                Quantity
-              </Label>
+              <Label htmlFor="quantity">Quantity</Label>
               <Input
                 id="quantity"
                 name="quantity"
                 placeholder="e.g. 3 pieces or 150g"
                 value={form.quantity}
                 onChange={handleChange}
-                className="focus:ring-2 focus:ring-orange-400"
                 required
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="calories" className="text-sm text-gray-700">
-                  Calories (optional)
-                </Label>
+                <Label htmlFor="calories">Calories</Label>
                 <Input
                   id="calories"
                   name="calories"
-                  placeholder="e.g. 250 kcal"
+                  placeholder="e.g. 250"
                   value={form.calories}
                   onChange={handleChange}
-                  className="focus:ring-2 focus:ring-orange-400"
+                  required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="price" className="text-sm text-gray-700">
-                  Price (₹)
-                </Label>
+                <Label htmlFor="price">Price (₹)</Label>
                 <Input
                   id="price"
                   name="price"
                   placeholder="e.g. 50"
                   value={form.price}
                   onChange={handleChange}
-                  className="focus:ring-2 focus:ring-orange-400"
+                  required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notes" className="text-sm text-gray-700">
-                Notes
-              </Label>
+              <Label htmlFor="notes">Notes</Label>
               <Textarea
                 id="notes"
                 name="notes"
                 placeholder="Any details about ingredients or timing..."
                 value={form.notes}
                 onChange={handleChange}
-                className=" h-24 resize-none focus:ring-2 focus:ring-orange-400"
               />
             </div>
           </CardContent>
@@ -121,9 +143,10 @@ export default function FoodForm() {
           <CardFooter className="flex justify-center">
             <Button
               type="submit"
+              disabled={loading}
               className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
             >
-              Add Entry
+              {loading ? "Adding..." : "Add Entry"}
             </Button>
           </CardFooter>
         </form>
